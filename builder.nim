@@ -62,7 +62,8 @@ proc fetchAll(publisher: Publisher, basePath, version: string) =
   let nims = basePath.nims()
   for nim in nims:
     if not nim.existsNimCommands():
-      raise newException(NimNotFoundError, "h")
+      raise newException(NimNotFoundError,
+        subex("nim or nimble not found in $#.") % [nim])
 
   var jobs: seq[Job] = @[]
   for fetchResult in fetch(nims[0]):
@@ -130,7 +131,8 @@ when isMainModule:
     expandedProjectPath = projectPath.getExpandPath()
 
   if not expandedProjectPath.existsGitProject():
-    raise newException(ArgumentError, "h")
+    raise newException(ArgumentError,
+      """Need to set git project to "--log-project" option.""")
 
   let pub = Publisher(basePath: expandedProjectPath)
   fetchAll(pub, expandedBasePath, version)
