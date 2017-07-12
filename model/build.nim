@@ -14,21 +14,34 @@
 # Author: Yoshihiro Tanaka <contact@cordea.jp>
 # date  : 2017-07-10
 
+import reason
+
 type
-  Build* = object
+  Job* = object
     name*: string
     libVersion*: string
+    message*: string
+    builds*: seq[Build]
+
+  Build* = object
+    nimVersion*: string
+    reason*: Reason
     successes: int
     failures: int
-    message*: string
 
-proc newBuild*(name, version: string): Build =
-  result = Build(
+proc newJob*(name, version: string): Job =
+  result = Job(
     name: name,
     libVersion: version,
+    message: "",
+    builds: @[])
+
+proc newBuild*(version: string): Build =
+  result = Build(
+    nimVersion: version,
+    reason: Reason.unknown,
     successes: 0,
-    failures: 0,
-    message: "")
+    failures: 0)
 
 proc succeeded*(build: var Build) =
   build.successes += 1

@@ -28,70 +28,73 @@ type
   NimNotFoundError = object of Exception
   ArgumentError = object of ValueError
 
-proc getOutputHeader(bin, name, version: string): string =
+proc getOutputHeader(nimDirPath, name, version: string): string =
   result = "---\n"
-  result &= getNimVersion(bin) & "\n"
+  result &= getNimVersion(nimDirPath) & "\n"
   result &= subex("$# v$#\n") % [name, version]
   result &= "---\n\n"
 
-proc installFailedResult(build: Build): Result =
-  result = Result(
-    name: build.name,
-    version: build.libVersion,
-    reason: Reason.installFailed)
+proc nims(basePath: string): seq[string] =
+  result = @[]
+  for n in walkDirs(basePath / "*"):
+    result.add n
 
-proc handleResult(build: Build, buildResults: var seq[Result]) =
-  if build.allGreen():
-    buildResults.add Result(
-      name: build.name,
-      version: build.libVersion,
-      reason: Reason.success)
-  else:
-    buildResults.add Result(
-      name: build.name,
-      version: build.libVersion,
-      reason: Reason.compileFailed)
+proc compileOutputs(res, command: string): string =
+  result = "+ " & command & "\n"
+  result &= res & "\n"
 
-proc compileOutputs(build: var Build, res, command: string) =
-  build.message &= "+ " & command & "\n"
-  build.message &= res & "\n"
-
-proc compileNimFiles(build: var Build, srcPath, bin: string) =
+proc compileNimFiles(build: var Build, srcPath, nimDirPath: string): string =
+  result = ""
   for path in walkFiles(srcPath / "*.nim"):
     let
-      command = getBuildCommand(bin, path, getDependenciesPath())
+      command = getBuildCommand(
+        nimDirPath.getNimBinPath(), path, getDependenciesPath())
       (res, code) = execCmdEx command
     if code == 0:
       build.succeeded()
     else:
       build.failed()
-    compileOutputs(build, res, command)
+    result &= compileOutputs(res, command)
 
 proc fetchAll(publisher: Publisher, basePath, version: string) =
-  let bin = getNimBinPath(basePath) / getNimCommand(version)
-  var buildResults: seq[Result] = @[]
-  for fetchResult in fetch(basePath):
+  let nims = basePath.nims()
+  for nim in nims:
+    if not nim.existsNimCommands():
+      raise newException(NimNotFoundError, "h")
+
+  var jobs: seq[Job] = @[]
+  for fetchResult in fetch(nims[0]):
     let
       info = fetchResult.packageInfo
       name = info.name
 
-    var build = newBuild(name, info.version)
-    build.message = getOutputHeader(bin, name, info.version)
-    if fetchResult.installResultCode != 0:
-      build.message &= fetchResult.installResult
-      buildResults.add build.installFailedResult()
-    else:
-      build.compileNimFiles(info.getResolveSrcPath(), bin)
+    var job = newJob(name, info.version)
 
-      if build.empty():
-        build.message &= "nim file not found."
+    for nim in nims:
+      var build = newBuild(nim.pathToVersion())
+
+      job.message = getOutputHeader(nim, name, info.version)
+
+      if fetchResult.installResultCode != 0:
+        job.message &= fetchResult.installResult
+        build.reason = Reason.installFailed
       else:
-        build.message &= build.message
+        job.message &= build.compileNimFiles(info.getResolveSrcPath(), nim)
 
-      handleResult(build, buildResults)
+        if build.empty():
+          job.message &= "nim script not found."
+
+        if build.allGreen():
+          build.reason = Reason.success
+        else:
+          build.reason = Reason.compileFailed
+
+      job.builds.add build
+      publisher.addBuildResult(name, job.message)
+
+    jobs.add job
     removeTempFiles()
-    publisher.addBuildResult(name, build.message)
-  publisher.addResults buildResults, bin
+  publisher.addResults jobs, nims
   publisher.commit()
 
 proc getExpandPath(path: string): string =
@@ -123,9 +126,6 @@ when isMainModule:
   let
     expandedBasePath = basePath.getExpandPath()
     expandedProjectPath = projectPath.getExpandPath()
-
-  if not expandedBasePath.existsNimCommands():
-    raise newException(NimNotFoundError, "h")
 
   if not expandedProjectPath.existsGitProject():
     raise newException(ArgumentError, "h")

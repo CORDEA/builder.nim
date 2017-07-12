@@ -15,16 +15,19 @@
 # date  : 2017-07-10
 
 const
+  unknownMessage = "-"
   successMessage = ":sunny:"
   installFailedMessage = ":zap:"
   compileFailedMessage = ":umbrella:"
 
 type
   Reason* = enum
-    success, installFailed, compileFailed
+    unknown, success, installFailed, compileFailed
 
 proc toMessage*(reason: Reason): string =
   case reason
+  of unknown:
+    return unknownMessage
   of success:
     return successMessage
   of installFailed:
@@ -32,4 +35,4 @@ proc toMessage*(reason: Reason): string =
   of compileFailed:
     return compileFailedMessage
   else:
-    return ""
+    return unknownMessage

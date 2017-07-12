@@ -15,17 +15,16 @@
 # date  : 2017-07-09
 
 import os, times, subexes
+import strutils
 
 import model/reason
+import model/build
 import compilehelper, git
 
 const
   readme = "README.md"
   templateFile = "template.md"
-  tableHeader = """
-| Name | Version | Status |
-|:---|:---|:---:|
-"""
+  tableHeader = "| Name | Version |"
 
 type
   Publisher* = object
@@ -62,20 +61,30 @@ proc publish*(publisher: Publisher, name: string) =
   let path = publisher.getPath name
   discard push(path, "master")
 
-proc getHeader(binPath: string): string =
+proc getHeader(binPaths: openArray[string]): string =
   result = templateFile.readFile()
-  result &= "```\n"
-  result &= getNimVersion binPath
-  result &= "```\n\n"
-  result &= tableHeader
+  for path in binPaths:
+    result &= "```\n"
+    result &= getNimVersion path
+    result &= "```\n\n"
+  result &= tableHeader.strip()
 
 proc addResults*(publisher: Publisher,
-  results: openArray[Result], binPath: string) =
-  var r = getHeader binPath
+  results: openArray[Job], binPaths: openArray[string]) =
+  var
+    r = getHeader binPaths
+    sep = "|:---:|:---:|"
+  for v in binPaths:
+    r &= subex(" $# |") % [v.pathToVersion()]
+    sep &= ":---:|"
+  r &= "\n" & sep & "\n"
+
   let path = publisher.basePath / readme
   for res in results:
-    r &= subex("| $# | $# | $# |\n") % [
-      res.name, res.version, res.reason.toMessage()]
+    r &= subex("| $# | $# |") % [res.name, res.libVersion]
+    for build in res.builds:
+      r &= subex(" $# |") % [build.reason.toMessage()]
+    r &= "\n"
 
   path.writeFile r
   discard add(publisher.basePath, readme)

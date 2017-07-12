@@ -32,4 +32,5 @@ proc commit*(path, message: string): int =
 proc add*(path, name: string): int =
   let (res, code) = execCmdEx subex("""cd $# && git add $#""") % [
     path, name]
+  discard res
   return code

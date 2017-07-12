@@ -16,27 +16,26 @@
 
 import os, osproc
 import strutils, subexes
+import ospaths
+
+proc pathToVersion*(path: string): string =
+  result = path.splitPath()[1]
 
 proc getNimBinPath*(basePath: string): string =
   result = basePath / "bin"
 
-proc getBuildCommand*(nim, name, nimblePath: string): string =
-  result = subex("$# c") % [nim]
+proc getBuildCommand*(binPath, name, nimblePath: string): string =
+  result = subex("$# c") % [binPath / "nim"]
   for dir in walkDirs(nimblePath / "*"):
     result &= subex(" -p:$#") % [dir]
   result &= " " & name
 
-proc getNimCommand*(version: string): string =
-  if version == nil:
-    return "nim"
-  let v = version.replace(".")
-  return subex("nim$#") % [v]
-
-proc getNimVersion*(bin: string): string =
-  let (res, code) = execCmdEx bin & " --version"
+proc getNimVersion*(path: string): string =
+  let (res, code) = execCmdEx subex("$# --version") % [
+    path.getNimBinPath() / "nim"]
   discard code
   result = res
 
 proc existsNimCommands*(path: string): bool =
-  let binPath = getNimBinPath(path)
+  let binPath = path.getNimBinPath()
   result = (binPath / "nim").existsFile() and (binPath / "nimble").existsFile()
