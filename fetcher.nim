@@ -27,6 +27,7 @@ import nimblepkg/cli
 import model/package
 import compilehelper
 import resolver, git
+import logger
 
 const
   jsonName = "packages_official.json"
@@ -75,10 +76,14 @@ proc removeTempFiles*() =
   getDependenciesPath().removeDir()
 
 iterator fetch*(basePath: string): FetchResult =
-  var (res, code) = execCmdEx getNimbleCommand(basePath, "refresh")
+  var
+    cmd = getNimbleCommand(basePath, "refresh")
+    (res, code) = execCmdEx cmd
   let
     jsonStr = (getNimblePath() / jsonName).readFile()
     json = parseJson jsonStr
+
+  log(cmd, res)
 
   let packages = json.elems.map(proc(x: JsonNode): Package =
     var pkg: Package
@@ -102,8 +107,10 @@ iterator fetch*(basePath: string): FetchResult =
       DownloadMethod.git,
       options)
 
-    (res, code) = execCmdEx subex("$# $#") % [
+    cmd = subex("$# $#") % [
       getNimbleCommand(basePath, "install -d"), package.name]
+    (res, code) = execCmdEx cmd
+    log(cmd, res)
 
     let info = resolve(path, options)
     yield FetchResult(

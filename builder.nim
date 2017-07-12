@@ -23,6 +23,7 @@ import model/package, model/reason
 import publisher, git
 import fetcher, resolver
 import compilehelper
+import logger
 
 type
   NimNotFoundError = object of Exception
@@ -50,6 +51,7 @@ proc compileNimFiles(build: var Build, srcPath, nimDirPath: string): string =
       command = getBuildCommand(
         nimDirPath.getNimBinPath(), path, getDependenciesPath())
       (res, code) = execCmdEx command
+    log(command, res)
     if code == 0:
       build.succeeded()
     else:

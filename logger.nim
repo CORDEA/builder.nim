@@ -12,33 +12,10 @@
 # limitations under the License.
 
 # Author: Yoshihiro Tanaka <contact@cordea.jp>
-# date  : 2017-07-08
+# date  : 2017-07-12
 
-import os, osproc, subexes
-import pegs
+import subexes
 
-import logger
-
-proc push*(path, branch: string): int =
-  let
-    cmd = subex("cd $# && git push origin $#") % [
-      path, branch]
-    (res, code) = execCmdEx cmd
-  log(cmd, res)
-  return code
-
-proc commit*(path, message: string): int =
-  let
-    cmd = subex("""cd $# && git commit -m "$#"""") % [
-      path, message]
-    (res, code) = execCmdEx cmd
-  log(cmd, res)
-  return code
-
-proc add*(path, name: string): int =
-  let
-    cmd = subex("""cd $# && git add $#""") % [
-      path, name]
-    (res, code) = execCmdEx cmd
-  log(cmd, res)
-  return code
+proc log*(command, output: string) =
+  echo subex("+ $#") % [command]
+  echo output
