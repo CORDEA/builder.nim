@@ -112,12 +112,17 @@ iterator fetch*(basePath: string): FetchResult =
         subex("$# not found.") % [package.url])
       continue
 
-    discard doDownload(
-      package.url,
-      path,
-      anyVersion,
-      getDownloadMethod(package.meth),
-      options)
+    try:
+      discard doDownload(
+        package.url,
+        path,
+        anyVersion,
+        getDownloadMethod(package.meth),
+        options)
+    except NimbleError:
+      let msg = getCurrentExceptionMsg()
+      yield newEmptyFetchResult(package.name, msg)
+      continue
 
     let info = resolve(path, options)
     cmd = subex("$# $#") % [
