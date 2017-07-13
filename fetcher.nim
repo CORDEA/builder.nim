@@ -75,6 +75,12 @@ proc removeTempFiles*() =
     path.removeDir()
   getDependenciesPath().removeDir()
 
+proc existsRepository(url: string): bool =
+  let (res, code) = execCmdEx subex("""curl -Is -o /dev/null -w "%{http_code}" $#""") % [
+    url]
+  discard code
+  result = res.strip() == "200"
+
 iterator fetch*(basePath: string): FetchResult =
   var
     cmd = getNimbleCommand(basePath, "refresh")
@@ -100,6 +106,12 @@ iterator fetch*(basePath: string): FetchResult =
 
   for package in packages:
     let path = getBasePath() / package.name
+
+    if not package.url.existsRepository():
+      yield newEmptyFetchResult(package.name,
+        subex("$# not found.") % [package.url])
+      continue
+
     discard doDownload(
       package.url,
       path,
@@ -107,13 +119,10 @@ iterator fetch*(basePath: string): FetchResult =
       DownloadMethod.git,
       options)
 
+    let info = resolve(path, options)
     cmd = subex("$# $#") % [
       getNimbleCommand(basePath, "install -d"), package.name]
     (res, code) = execCmdEx cmd
     log(cmd, res)
 
-    let info = resolve(path, options)
-    yield FetchResult(
-      installResultCode: code,
-      installResult: res,
-      packageInfo: info)
+    yield newFetchResult(res, code, info)

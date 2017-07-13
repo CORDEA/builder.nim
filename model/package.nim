@@ -16,6 +16,9 @@
 
 import nimblepkg/common
 
+const
+  unknownVersion = "-"
+
 type
   Package* = object
     name*: string
@@ -26,3 +29,18 @@ type
     installResultCode*: int
     installResult*: string
     packageInfo*: PackageInfo
+
+proc newFetchResult*(res: string, code: int, info: PackageInfo): FetchResult =
+  result = FetchResult(
+    installResultCode: code,
+    installResult: res,
+    packageInfo: info)
+
+proc newEmptyFetchResult*(name, msg: string): FetchResult =
+  var info = PackageInfo()
+  info.name = name
+  info.version = unknownVersion
+  result = FetchResult(
+    installResultCode: 1,
+    installResult: msg,
+    packageInfo: info)
