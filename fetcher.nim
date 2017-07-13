@@ -116,7 +116,7 @@ iterator fetch*(basePath: string): FetchResult =
       package.url,
       path,
       anyVersion,
-      DownloadMethod.git,
+      getDownloadMethod(package.meth),
       options)
 
     let info = resolve(path, options)
