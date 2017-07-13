@@ -124,5 +124,9 @@ when isMainModule:
     raise newException(ArgumentError,
       """Need to set git project to "--log-project" option.""")
 
+  putEnv("GIT_TERMINAL_PROMPT", "0")
+
   let pub = Publisher(basePath: expandedProjectPath)
   fetchAll(pub, expandedBasePath, version)
+
+  putEnv("GIT_TERMINAL_PROMPT", "")

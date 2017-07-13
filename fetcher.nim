@@ -65,9 +65,8 @@ proc getDependenciesPath*(): string =
 
 proc getNimbleCommand(basePath, subcommand: string): string =
   let path = getNimblePath()
-  result = "GIT_TERMINAL_PROMPT=0 " &
-    basePath.getNimBinPath() / (subex("nimble --nimbleDir:$# $# -y") % [
-      path, subcommand])
+  result = basePath.getNimBinPath() / (subex("nimble --nimbleDir:$# $# -y") % [
+    path, subcommand])
 
 proc removeTempFiles*() =
   let pat = getBasePath() / "*"
