@@ -29,20 +29,10 @@ type
   NimNotFoundError = object of Exception
   ArgumentError = object of ValueError
 
-proc getOutputHeader(nimDirPath, name, version: string): string =
-  result = "---\n"
-  result &= getNimVersion(nimDirPath) & "\n"
-  result &= subex("$# v$#\n") % [name, version]
-  result &= "---\n\n"
-
 proc nims(basePath: string): seq[string] =
   result = @[]
   for n in walkDirs(basePath / "*"):
     result.add n
-
-proc compileOutputs(res, command: string): string =
-  result = "+ " & command & "\n"
-  result &= res & "\n"
 
 proc compileNimFiles(build: var Build, srcPath, nimDirPath: string): string =
   result = ""
@@ -56,7 +46,7 @@ proc compileNimFiles(build: var Build, srcPath, nimDirPath: string): string =
       build.succeeded()
     else:
       build.failed()
-    result &= compileOutputs(res, command)
+    result &= getLogOutput(command, res)
 
 proc fetchAll(publisher: Publisher, basePath, version: string) =
   let nims = basePath.nims()
@@ -76,7 +66,7 @@ proc fetchAll(publisher: Publisher, basePath, version: string) =
     for nim in nims:
       var build = newBuild(nim.pathToVersion())
 
-      job.message = getOutputHeader(nim, name, info.version)
+      job.message = getLogOutputHeader(nim, name, info.version)
 
       if fetchResult.installResultCode != 0:
         job.message &= fetchResult.installResult

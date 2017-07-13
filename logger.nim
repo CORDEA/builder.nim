@@ -16,6 +16,25 @@
 
 import subexes
 
+import model/package
+import compilehelper
+
+const
+  separator = "---"
+
+proc getLogOutput*(command, output: string): string =
+  result = subex("+ $#\n") % [command]
+  result &= output & "\n"
+
 proc log*(command, output: string) =
   echo subex("+ $#") % [command]
   echo output
+
+proc getLogOutputHeader*(nimDirPath, name, version: string): string =
+  result = separator & "\n"
+  result &= getNimVersion(nimDirPath) & "\n"
+  if version.isUnknownVersion():
+    result &= subex("$#\n") % [name]
+  else:
+    result &= subex("$# v$#\n") % [name, version]
+  result &= separator & "\n\n"

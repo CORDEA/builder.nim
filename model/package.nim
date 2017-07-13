@@ -44,3 +44,6 @@ proc newEmptyFetchResult*(name, msg: string): FetchResult =
     installResultCode: 1,
     installResult: msg,
     packageInfo: info)
+
+proc isUnknownVersion*(version: string): bool =
+  result = version == unknownVersion
