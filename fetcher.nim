@@ -23,6 +23,7 @@ import nimblepkg/download
 import nimblepkg/version
 import nimblepkg/common
 import nimblepkg/cli
+import compiler/passes
 
 import model/package
 import compilehelper
@@ -118,6 +119,10 @@ iterator fetch*(basePath: string): FetchResult =
         getDownloadMethod(package.meth),
         options)
     except NimbleError:
+      # Clear the passes explicitly, because registered passes is not cleared when error occurs.
+      # https://github.com/nim-lang/nimble/blob/10a38a3c90e96bd128dce0538906944a14bf8828/src/nimblepkg/nimscriptsupport.nim#L241
+      clearPasses()
+
       let msg = getCurrentExceptionMsg()
       yield newEmptyFetchResult(package.name, msg)
       continue
