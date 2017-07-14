@@ -20,25 +20,25 @@ import pegs
 import logger
 
 proc push*(path, branch: string): int =
-  let
-    cmd = subex("cd $# && git push origin $#") % [
-      path, branch]
-    (res, code) = execCmdEx cmd
-  log(cmd, res)
+  let cmd = subex("cd $# && git push origin $#") % [
+    path, branch]
+  logCmd cmd
+  let (res, code) = execCmdEx cmd
+  log res
   return code
 
 proc commit*(path, message: string): int =
-  let
-    cmd = subex("""cd $# && git commit -m "$#"""") % [
-      path, message]
-    (res, code) = execCmdEx cmd
-  log(cmd, res)
+  let cmd = subex("""cd $# && git commit -m "$#"""") % [
+    path, message]
+  logCmd cmd
+  let (res, code) = execCmdEx cmd
+  log res
   return code
 
 proc add*(path, name: string): int =
-  let
-    cmd = subex("""cd $# && git add $#""") % [
-      path, name]
-    (res, code) = execCmdEx cmd
-  log(cmd, res)
+  let cmd = subex("""cd $# && git add $#""") % [
+    path, name]
+  logCmd cmd
+  let (res, code) = execCmdEx cmd
+  log res
   return code

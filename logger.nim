@@ -26,8 +26,10 @@ proc getLogOutput*(command, output: string): string =
   result = subex("+ $#\n") % [command]
   result &= output & "\n"
 
-proc log*(command, output: string) =
+proc logCmd*(command: string) =
   echo subex("+ $#") % [command]
+
+proc log*(output: string) =
   echo output
 
 proc getLogOutputHeader*(nimDirPath, name, version: string): string =

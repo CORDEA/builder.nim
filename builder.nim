@@ -37,11 +37,11 @@ proc nims(basePath: string): seq[string] =
 proc compileNimFiles(build: var Build, srcPath, nimDirPath: string): string =
   result = ""
   for path in walkFiles(srcPath / "*.nim"):
-    let
-      command = getBuildCommand(
-        nimDirPath.getNimBinPath(), path, getDependenciesPath())
-      (res, code) = execCmdEx command
-    log(command, res)
+    let command = getBuildCommand(
+      nimDirPath.getNimBinPath(), path, getDependenciesPath())
+    logCmd command
+    let (res, code) = execCmdEx command
+    log res
     if code == 0:
       build.succeeded()
     else:

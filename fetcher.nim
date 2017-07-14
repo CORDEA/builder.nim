@@ -81,14 +81,13 @@ proc existsRepository(url: string): bool =
   result = res.strip() == "200"
 
 iterator fetch*(basePath: string): FetchResult =
-  var
-    cmd = getNimbleCommand(basePath, "refresh")
-    (res, code) = execCmdEx cmd
+  var cmd = getNimbleCommand(basePath, "refresh")
+  logCmd cmd
+  var (res, code) = execCmdEx cmd
+  log res
   let
     jsonStr = (getNimblePath() / jsonName).readFile()
     json = parseJson jsonStr
-
-  log(cmd, res)
 
   let packages = json.elems.map(proc(x: JsonNode): Package =
     var pkg: Package
@@ -126,7 +125,8 @@ iterator fetch*(basePath: string): FetchResult =
     let info = resolve(path, options)
     cmd = subex("$# $#") % [
       getNimbleCommand(basePath, "install -d"), package.name]
+    logCmd cmd
     (res, code) = execCmdEx cmd
-    log(cmd, res)
+    log res
 
     yield newFetchResult(res, code, info)
