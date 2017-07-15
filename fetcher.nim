@@ -121,7 +121,7 @@ iterator fetch*(basePath: string): FetchResult =
         anyVersion,
         getDownloadMethod(package.meth),
         options)
-    except NimbleError:
+    except NimbleError, OSError:
       # Clear the passes explicitly, because registered passes is not cleared when error occurs.
       # https://github.com/nim-lang/nimble/blob/10a38a3c90e96bd128dce0538906944a14bf8828/src/nimblepkg/nimscriptsupport.nim#L241
       when declared(resetAllModulesHard):
