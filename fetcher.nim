@@ -18,12 +18,15 @@ import os, osproc, ospaths
 import subexes, strutils, sequtils
 import json, marshal
 
+import nimblepkg/nimscriptsupport
 import nimblepkg/options
 import nimblepkg/download
 import nimblepkg/version
 import nimblepkg/common
 import nimblepkg/cli
 import compiler/passes
+import compiler/modules
+import compiler/condsyms
 
 import model/package
 import compilehelper
@@ -121,7 +124,12 @@ iterator fetch*(basePath: string): FetchResult =
     except NimbleError:
       # Clear the passes explicitly, because registered passes is not cleared when error occurs.
       # https://github.com/nim-lang/nimble/blob/10a38a3c90e96bd128dce0538906944a14bf8828/src/nimblepkg/nimscriptsupport.nim#L241
+      when declared(resetAllModulesHard):
+        resetAllModulesHard()
+      else:
+        resetSystemArtifacts()
       clearPasses()
+      initDefines()
 
       let msg = getCurrentExceptionMsg()
       yield newEmptyFetchResult(package.name, msg)
