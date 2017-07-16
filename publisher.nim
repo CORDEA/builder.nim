@@ -26,6 +26,7 @@ const
   readme = "README.md"
   templateFile = "template.md"
   tableHeader = "| Name | Version |"
+  packagesDirName = "packages"
 
 type
   Publisher* = object
@@ -36,15 +37,19 @@ type
     version*: string
     reason*: Reason
 
-proc getPath(publisher: Publisher, name: string): string =
-  result = publisher.basePath / name
+proc getPackagesPath(publisher: Publisher): string =
+  result = publisher.basePath / packagesDirName
+  discard result.existsOrCreateDir()
+
+proc getLibraryPath(publisher: Publisher, name: string): string =
+  result = publisher.getPackagesPath() / name
+  discard result.existsOrCreateDir()
 
 proc getFileName(): string =
   result = $(epochTime().toInt()) & ".md"
 
 proc getFilePath(publisher: Publisher, name, getFileName: string): string =
-  let path = publisher.getPath name
-  discard path.existsOrCreateDir()
+  let path = publisher.getLibraryPath name
   result = path / getFileName
 
 proc addBuildResult*(publisher: Publisher, name, res: string) =
@@ -53,13 +58,13 @@ proc addBuildResult*(publisher: Publisher, name, res: string) =
     path = publisher.getFilePath(name, getFileName)
 
   path.writeFile res
-  discard add(publisher.getPath(name), getFileName)
+  discard add(publisher.getLibraryPath(name), getFileName)
 
 proc commit*(publisher: Publisher) =
   discard commit(publisher.basePath, subex("Build on $#") % [$getTime()])
 
 proc publish*(publisher: Publisher, name: string) =
-  let path = publisher.getPath name
+  let path = publisher.getLibraryPath name
   discard push(path, "master")
 
 proc getHeader(binPaths: openArray[string]): string =
