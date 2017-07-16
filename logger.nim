@@ -19,12 +19,9 @@ import subexes
 import model/package
 import compilehelper
 
-const
-  separator = "---"
-
 proc getLogOutput*(command, output: string): string =
   result = subex("+ $#\n") % [command]
-  result &= output & "\n"
+  result &= output
 
 proc logCmd*(command: string) =
   echo subex("+ $#") % [command]
@@ -32,11 +29,17 @@ proc logCmd*(command: string) =
 proc log*(output: string) =
   echo output
 
+proc forOutput*(command: string): string =
+  result = "```\n"
+  result &= command
+  result &= "\n```\n"
+
 proc getLogOutputHeader*(nimDirPath, name, version: string): string =
-  result = separator & "\n"
-  result &= getNimVersion(nimDirPath) & "\n"
   if version.isUnknownVersion():
-    result &= subex("$#\n") % [name]
+    result = subex("# $#") % [name]
   else:
-    result &= subex("$# v$#\n") % [name, version]
-  result &= separator & "\n\n"
+    result = subex("# $# v$#") % [name, version]
+  result &= "\n\n"
+  result &= getNimVersion(nimDirPath).forOutput()
+  result &= "\n"
+  result &= "## Log\n\n"

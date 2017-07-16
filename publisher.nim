@@ -19,7 +19,8 @@ import strutils
 
 import model/reason
 import model/build
-import compilehelper, git
+import compilehelper
+import logger, git
 
 const
   readme = "README.md"
@@ -39,7 +40,7 @@ proc getPath(publisher: Publisher, name: string): string =
   result = publisher.basePath / name
 
 proc getFileName(): string =
-  result = $(epochTime().toInt()) & ".log"
+  result = $(epochTime().toInt()) & ".md"
 
 proc getFilePath(publisher: Publisher, name, getFileName: string): string =
   let path = publisher.getPath name
@@ -64,9 +65,9 @@ proc publish*(publisher: Publisher, name: string) =
 proc getHeader(binPaths: openArray[string]): string =
   result = templateFile.readFile()
   for path in binPaths:
-    result &= "```\n"
-    result &= getNimVersion path
-    result &= "```\n\n"
+    result &= getNimVersion(path).forOutput()
+    result &= "\n"
+  result &= "## Build status\n\n"
   result &= tableHeader.strip()
 
 proc addResults*(publisher: Publisher,

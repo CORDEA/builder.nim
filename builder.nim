@@ -69,13 +69,17 @@ proc fetchAll(publisher: Publisher, basePath, version: string) =
       job.message = getLogOutputHeader(nim, name, info.version)
 
       if fetchResult.installResultCode != 0:
-        job.message &= fetchResult.installResult
+        job.message &= fetchResult
+          .installResult
+          .forOutput()
         build.reason = Reason.installFailed
       else:
-        job.message &= build.compileNimFiles(info.getResolveSrcPath(), nim)
+        job.message &= build
+          .compileNimFiles(info.getResolveSrcPath(), nim)
+          .forOutput()
 
         if build.empty():
-          job.message &= "nim script not found."
+          job.message &= "nim script not found.".forOutput()
 
         if build.allGreen():
           build.reason = Reason.success
