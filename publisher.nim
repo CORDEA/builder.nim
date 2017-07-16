@@ -48,17 +48,17 @@ proc getLibraryPath(publisher: Publisher, name: string): string =
 proc getFileName(): string =
   result = $(epochTime().toInt()) & ".md"
 
-proc getFilePath(publisher: Publisher, name, getFileName: string): string =
+proc getFilePath(publisher: Publisher, name, fileName: string): string =
   let path = publisher.getLibraryPath name
-  result = path / getFileName
+  result = path / fileName
 
 proc addBuildResult*(publisher: Publisher, name, res: string) =
   let
-    getFileName = getFileName()
-    path = publisher.getFilePath(name, getFileName)
+    fileName = getFileName()
+    path = publisher.getFilePath(name, fileName)
 
   path.writeFile res
-  discard add(publisher.getLibraryPath(name), getFileName)
+  discard add(publisher.getLibraryPath(name), fileName)
 
 proc commit*(publisher: Publisher) =
   discard commit(publisher.basePath, subex("Build on $#") % [$getTime()])
