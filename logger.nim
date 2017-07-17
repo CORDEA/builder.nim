@@ -15,6 +15,7 @@
 # date  : 2017-07-12
 
 import subexes
+import strutils
 
 import model/package
 import compilehelper
@@ -32,7 +33,10 @@ proc log*(output: string) =
 proc forOutput*(command: string): string =
   result = "```\n"
   result &= command
-  result &= "\n```\n"
+  if command.endsWith "\n":
+    result &= "```\n"
+  else:
+    result &= "\n```\n"
 
 proc getLogOutputHeader*(nimDirPath, name, version: string): string =
   if version.isUnknownVersion():
