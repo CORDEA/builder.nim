@@ -14,9 +14,9 @@ $ ./builder --log-project:/git/project/path ~/nim/bin/path
 ## How
 
 1. Download package.
-- Download package dependencies by nimble.
-- Build all nim scripts in srcDir.
-- Output the result.
+2. Download package dependencies by nimble.
+3. Build all nim scripts in srcDir.
+4. Output the result.
 
 ## Status icon
 
