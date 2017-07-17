@@ -36,6 +36,11 @@ proc getNimVersion*(path: string): string =
   discard code
   result = res
 
+proc getOsDetail*(): string =
+  let (res, code) = execCmdEx "uname -a"
+  discard code
+  result = res
+
 proc existsNimCommands*(path: string): bool =
   let binPath = path.getNimBinPath()
   result = (binPath / "nim").existsFile() and (binPath / "nimble").existsFile()

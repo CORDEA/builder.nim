@@ -69,6 +69,10 @@ proc publish*(publisher: Publisher, name: string) =
 
 proc getHeader(binPaths: openArray[string]): string =
   result = templateFile.readFile()
+  result &= "## OS\n\n"
+  result &= getOsDetail().forOutput()
+  result &= "\n"
+  result &= "## Nim\n\n"
   for path in binPaths:
     result &= getNimVersion(path).forOutput()
     result &= "\n"
