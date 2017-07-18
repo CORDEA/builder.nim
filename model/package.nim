@@ -28,21 +28,24 @@ type
   FetchResult* = object
     installResultCode*: int
     installResult*: string
+    url*: string
     packageInfo*: PackageInfo
 
-proc newFetchResult*(res: string, code: int, info: PackageInfo): FetchResult =
+proc newFetchResult*(res, url: string, code: int, info: PackageInfo): FetchResult =
   result = FetchResult(
     installResultCode: code,
     installResult: res,
+    url: url,
     packageInfo: info)
 
-proc newEmptyFetchResult*(name, msg: string): FetchResult =
+proc newEmptyFetchResult*(name, url, msg: string): FetchResult =
   var info = PackageInfo()
   info.name = name
   info.version = unknownVersion
   result = FetchResult(
     installResultCode: 1,
     installResult: msg,
+    url: url,
     packageInfo: info)
 
 proc isUnknownVersion*(version: string): bool =

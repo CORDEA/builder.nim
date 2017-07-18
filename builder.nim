@@ -61,7 +61,7 @@ proc fetchAll(publisher: Publisher, basePath, version: string) =
       info = fetchResult.packageInfo
       name = info.name
 
-    var job = newJob(name, info.version)
+    var job = newJob(name, fetchResult.url, info.version)
 
     for nim in nims:
       var build = newBuild(nim.pathToVersion())

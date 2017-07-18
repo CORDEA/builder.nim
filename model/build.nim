@@ -19,6 +19,7 @@ import reason
 type
   Job* = object
     name*: string
+    url*: string
     libVersion*: string
     message*: string
     builds*: seq[Build]
@@ -29,9 +30,10 @@ type
     successes: int
     failures: int
 
-proc newJob*(name, version: string): Job =
+proc newJob*(name, url, version: string): Job =
   result = Job(
     name: name,
+    url: url,
     libVersion: version,
     message: "",
     builds: @[])

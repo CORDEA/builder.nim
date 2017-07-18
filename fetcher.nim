@@ -111,6 +111,7 @@ iterator fetch*(basePath: string): FetchResult =
 
     if not package.url.existsRepository():
       yield newEmptyFetchResult(package.name,
+        package.url,
         subex("$# not found.") % [package.url])
       continue
 
@@ -132,7 +133,7 @@ iterator fetch*(basePath: string): FetchResult =
       initDefines()
 
       let msg = getCurrentExceptionMsg()
-      yield newEmptyFetchResult(package.name, msg)
+      yield newEmptyFetchResult(package.name, package.url, msg)
       continue
 
     let info = resolve(path, options)
@@ -142,4 +143,4 @@ iterator fetch*(basePath: string): FetchResult =
     (res, code) = execCmdEx cmd
     log res
 
-    yield newFetchResult(res, code, info)
+    yield newFetchResult(res, package.url, code, info)

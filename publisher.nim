@@ -79,6 +79,9 @@ proc getHeader(binPaths: openArray[string]): string =
   result &= "## Build status\n\n"
   result &= tableHeader.strip()
 
+proc toLink(name, url: string): string =
+  result = subex("[$#]($#)") % [name, url]
+
 proc addResults*(publisher: Publisher,
   results: openArray[Job], binPaths: openArray[string]) =
   var
@@ -91,7 +94,8 @@ proc addResults*(publisher: Publisher,
 
   let path = publisher.basePath / readme
   for res in results:
-    r &= subex("| $# | $# |") % [res.name, res.libVersion]
+    r &= subex("| $# | $# |") % [
+      toLink(res.name, res.url), res.libVersion]
     for build in res.builds:
       r &= subex(" $# |") % [build.reason.toMessage()]
     r &= "\n"
