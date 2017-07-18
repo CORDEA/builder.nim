@@ -86,8 +86,8 @@ proc fetchAll(publisher: Publisher, basePath, version: string) =
         else:
           build.reason = Reason.compileFailed
 
+      build.logFilePath = publisher.addBuildResult(name, job.message)
       job.builds.add build
-      publisher.addBuildResult(name, job.message)
 
     jobs.add job
     removeTempFiles()

@@ -27,6 +27,7 @@ type
   Build* = object
     nimVersion*: string
     reason*: Reason
+    logFilePath*: string
     successes: int
     failures: int
 
@@ -42,6 +43,7 @@ proc newBuild*(version: string): Build =
   result = Build(
     nimVersion: version,
     reason: Reason.unknown,
+    logFilePath: "",
     successes: 0,
     failures: 0)
 

@@ -52,13 +52,14 @@ proc getFilePath(publisher: Publisher, name, fileName: string): string =
   let path = publisher.getLibraryPath name
   result = path / fileName
 
-proc addBuildResult*(publisher: Publisher, name, res: string) =
+proc addBuildResult*(publisher: Publisher, name, res: string): string =
   let
     fileName = getFileName()
     path = publisher.getFilePath(name, fileName)
 
   path.writeFile res
   discard add(publisher.getLibraryPath(name), fileName)
+  result = packagesDirName / name / fileName
 
 proc commit*(publisher: Publisher) =
   discard commit(publisher.basePath, subex("Build on $#") % [$getTime()])
@@ -97,7 +98,8 @@ proc addResults*(publisher: Publisher,
     r &= subex("| $# | $# |") % [
       toLink(res.name, res.url), res.libVersion]
     for build in res.builds:
-      r &= subex(" $# |") % [build.reason.toMessage()]
+      r &= subex(" $# |") % [
+        toLink(build.reason.toMessage(), build.logfilePath)]
     r &= "\n"
 
   path.writeFile r
