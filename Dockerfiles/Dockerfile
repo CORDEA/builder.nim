@@ -26,5 +26,6 @@ RUN scl enable rh-git29 \
         cd /home/builder.nim && \
         nim c builder.nim
 
-ENTRYPOINT ["scl"]
-CMD ["enable", "rh-git29", "bash"]
+ADD enablegit29.sh /etc/profile.d/enablegit29.sh
+
+ENTRYPOINT ["bash"]
