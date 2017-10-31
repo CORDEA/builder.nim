@@ -79,7 +79,7 @@ proc removeTempFiles*() =
   getDependenciesPath().removeDir()
 
 proc existsRepository(url: string): bool =
-  let (res, code) = execCmdEx subex("""curl -Is -o /dev/null -w "%{http_code}" $#""") % [
+  let (res, code) = execCmdEx subex("""curl -ILs -o /dev/null -w "%{http_code}" $#""") % [
     url]
   discard code
   result = res.strip() == "200"
