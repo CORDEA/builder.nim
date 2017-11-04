@@ -4,7 +4,7 @@ MAINTAINER Yoshihiro Tanaka <contact@cordea.jp>
 
 RUN yum update -y && \
         yum install -y centos-release-scl && \
-        yum install -y gcc rh-git29
+        yum install -y gcc rh-git29 hg
 
 RUN scl enable rh-git29 "git clone https://github.com/nim-lang/Nim.git /home/nims/latest/" && \
         cd /home/nims/latest/ && \
