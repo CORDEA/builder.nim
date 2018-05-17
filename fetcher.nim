@@ -16,6 +16,7 @@
 
 import os, osproc, ospaths
 import subexes, strutils, sequtils
+import tables
 import json, marshal
 
 import nimblepkg/nimscriptsupport
@@ -115,22 +116,28 @@ iterator fetch*(basePath: string): FetchResult =
         subex("$# not found.") % [package.url])
       continue
 
+    let
+      (uri, table) = getUrlData(package.url)
+      subdir = table["subdir"]
+
     try:
-      discard doDownload(
-        package.url,
-        path,
+      discard downloadPkg(
+        uri,
         anyVersion,
         getDownloadMethod(package.meth),
-        options)
+        subdir,
+        options,
+        path)
     except NimbleError, OSError:
       # Clear the passes explicitly, because registered passes is not cleared when error occurs.
       # https://github.com/nim-lang/nimble/blob/10a38a3c90e96bd128dce0538906944a14bf8828/src/nimblepkg/nimscriptsupport.nim#L241
-      when declared(resetAllModulesHard):
-        resetAllModulesHard()
-      else:
-        resetSystemArtifacts()
-      clearPasses()
-      initDefines()
+      # Still need this?
+      # when declared(resetAllModulesHard):
+        # resetAllModulesHard()
+      # else:
+        # resetSystemArtifacts()
+      # clearPasses()
+      # initDefines()
 
       let msg = getCurrentExceptionMsg()
       yield newEmptyFetchResult(package.name, package.url, msg)
